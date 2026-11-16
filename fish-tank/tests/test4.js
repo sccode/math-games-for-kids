@@ -3,7 +3,7 @@ let pass=0,fail=0;const ok=(c,m)=>{c?pass++:fail++;console.log(c?'PASS':'FAIL',m
 (async()=>{const b=await chromium.launch();
 const seed=JSON.stringify({v:2,current:'Mia',grade:6,players:{Mia:{stars:3,points:200,spent:0,rounds:2,grade:6,best:{},cards:{fifty:0,skip:0,plug:0,freeze:0}}}});
 const ctx=await b.newContext({viewport:{width:400,height:900}});
-await ctx.addInitScript(s=>{if(!sessionStorage.s){sessionStorage.s=1;localStorage.setItem('fishtankmath.v1',s);}},seed);
+await ctx.addInitScript(s=>{if(!sessionStorage.s&&!localStorage.getItem('noseed')){sessionStorage.s=1;localStorage.setItem('fishtankmath.v1',s);}},seed);
 const p=await ctx.newPage();const errs=[];p.on('pageerror',e=>errs.push(e.message));
 await p.goto('file://'+process.cwd()+'/game_debug.html');
 const st=()=>p.evaluate(()=>JSON.parse(localStorage.getItem('fishtankmath.v1')).players.Mia);
@@ -13,7 +13,7 @@ let s=await st();ok(s.spent===200&&s.cards.fifty===1&&s.cards.skip===1&&s.cards.
 ok(await p.$eval('[data-card="fifty"].buy',e=>e.disabled),'cannot buy with 0 balance');
 // code roundtrip
 await p.click('#mkCode');const code=await p.inputValue('#codeText');
-await p.evaluate(()=>localStorage.clear());await p.reload();
+await p.evaluate(()=>{localStorage.clear();localStorage.setItem('noseed','1');});await p.reload();
 await p.fill('#pasteCode',code);await p.click('#restoreBtn');
 s=await st();ok(s.spent===200&&s.cards.plug===1&&s.points===200,'save code restores spent+cards');
 await p.click('#playBtn');

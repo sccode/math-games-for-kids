@@ -3,7 +3,7 @@ let pass=0,fail=0;const ok=(c,m)=>{c?pass++:fail++;console.log(c?'PASS':'FAIL',m
 (async()=>{const b=await chromium.launch();
 const seed=JSON.stringify({v:2,current:'Mia',grade:4,players:{Mia:{stars:50,points:100,spent:0,rounds:1,grade:4,best:{},cards:{}}}});
 const ctx=await b.newContext({viewport:{width:400,height:900}});
-await ctx.addInitScript(s=>{if(!sessionStorage.s){sessionStorage.s=1;localStorage.setItem('fishtankmath.v1',s);}
+await ctx.addInitScript(s=>{if(!sessionStorage.s&&!localStorage.getItem('noseed')){sessionStorage.s=1;localStorage.setItem('fishtankmath.v1',s);}
  window.__osc=0;const P=(n)=>{};
  class FakeParam{setValueAtTime(){}exponentialRampToValueAtTime(){}set value(v){}}
  class AC{constructor(){this.state='running';this.sampleRate=8000;this.currentTime=0;this.destination={};}
