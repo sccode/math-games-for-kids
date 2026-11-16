@@ -1,6 +1,6 @@
 # Fish Tank Math
 
-A free browser game for California Common Core math, grades 3-8. Right answers pour water into the tank; fill it above the leaking holes to earn stars. Points buy magic cards (50/50, Skip, Plug, Freeze).
+A free browser game for California Common Core math, grades 3-8. Right answers pour water into the tank; fill it above the leaking holes to earn stars. Points buy magic cards (50/50, Skip, Plug, Freeze); stars buy new fish, tank decorations and back walls. Sound effects are made in the browser (mute button in the header).
 
 - Play: open `index.html` (single file, no server needed).
 - With GitHub Pages enabled (Settings > Pages > Deploy from branch `main`, folder `/root`), it is at `https://sccode.github.io/math-games-for-kids/fish-tank/`.

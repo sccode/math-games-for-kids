@@ -31,10 +31,14 @@ button:focus-visible,input:focus-visible{outline:4px solid var(--coral);outline-
 .dim{color:var(--ink-soft);font-weight:700}
 
 .top{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:6px 0 14px}
-.brand{display:flex;align-items:center;gap:8px;font-family:var(--display);font-weight:700;font-size:1.5rem}
-.brand svg{width:44px;height:30px}
+.brand{display:flex;align-items:center;gap:8px;min-width:0;font-family:var(--display);font-weight:700;font-size:clamp(1.05rem,5.4vw,1.5rem);line-height:1.1}
+.brand svg{flex:none;width:40px;height:28px}
+.topright{display:flex;align-items:center;gap:8px;flex:none}
+.mute{width:40px;height:40px;border-radius:50%;border:3px solid var(--ink);background:var(--card);color:var(--ink);display:grid;place-items:center;box-shadow:0 3px 0 rgba(22,64,92,.25);padding:0}
+.mute svg{width:24px;height:24px}
+.mute[aria-pressed="true"]{background:var(--peach)}
 .who{display:flex;align-items:center;gap:10px;background:var(--card);border:3px solid var(--ink);border-radius:999px;padding:3px 14px;font-weight:800;box-shadow:0 3px 0 rgba(22,64,92,.25)}
-.who .n{max-width:9ch;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.who .n{max-width:7ch;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 
 /* buttons */
 .btn{border:3px solid var(--ink);border-radius:16px;padding:10px 20px;font-weight:800;background:var(--sea);color:#fff;min-height:48px;box-shadow:0 4px 0 var(--ink);text-shadow:0 1px 0 rgba(22,64,92,.35)}
@@ -138,6 +142,9 @@ button:focus-visible,input:focus-visible,textarea:focus-visible,summary:focus-vi
 .shoprow{display:flex;align-items:center;gap:12px;padding:10px 0;border-top:2px dashed var(--line)}
 .shoprow .ctext{flex:1;min-width:0;font-size:.95rem;line-height:1.3}
 .shoprow .have{font-weight:700;color:var(--ink-soft);font-size:.85rem}
+.pv{flex:none;width:64px;height:40px;border-radius:12px;border:3px solid var(--ink);background:var(--sky-2);display:grid;place-items:center;overflow:hidden}
+.pv svg{width:100%;height:100%;display:block}
+#fishList h3{font-family:var(--display);font-size:1.05rem;margin:14px 0 2px}
 .btn.buy{min-width:84px;padding:8px 12px}
 .cicon{flex:none;width:40px;height:40px;border-radius:12px;border:3px solid var(--ink);display:grid;place-items:center;font-weight:900;font-size:1.2rem;background:var(--lemon)}
 .c-fifty .cicon,.cicon.c-fifty{background:var(--lilac)}.cicon.c-skip{background:var(--peach)}.cicon.c-plug{background:var(--mint)}.cicon.c-freeze{background:var(--sky)}
@@ -185,7 +192,8 @@ button:focus-visible,input:focus-visible,textarea:focus-visible,summary:focus-vi
 <div class="wrap">
   <header class="top">
     <div class="brand"><svg aria-hidden="true"><use href="#fishy"/></svg>Fish Tank Math</div>
-    <div class="who" id="who" hidden><span class="n" id="whoName"></span><span><svg class="icon"><use href="#star"/></svg> <b id="whoStars">0</b></span></div>
+    <div class="topright"><button class="mute" id="muteBtn" type="button"></button>
+    <div class="who" id="who" hidden><span class="n" id="whoName"></span><span><svg class="icon"><use href="#star"/></svg> <b id="whoStars">0</b></span></div></div>
   </header>
 
   <main>
@@ -234,6 +242,11 @@ button:focus-visible,input:focus-visible,textarea:focus-visible,summary:focus-vi
         </div>
       </div>
       <div class="startrow"><button class="btn go" id="playBtn" type="button">Play!</button></div>
+      <div class="card shopcard" id="fishCard" hidden>
+        <h2>Fish &amp; tank shop</h2>
+        <p class="dim">Spend your stars on new fish and tank decorations. You have <b id="sBal">0</b> stars to spend.</p>
+        <div id="fishList"></div>
+      </div>
       <div class="card shopcard" id="shopCard" hidden>
         <h2>Magic cards</h2>
         <p class="dim">Points you earn in rounds can buy cards. Use each card once per round. You have <b id="balance">0</b> points to spend.</p>
@@ -270,7 +283,7 @@ button:focus-visible,input:focus-visible,textarea:focus-visible,summary:focus-vi
             <rect x="0" y="392" width="380" height="4" fill="#16405c"/>
             <rect x="36" y="366" width="216" height="28" rx="8" fill="#ffcf8b" stroke="#16405c" stroke-width="3"/>
             <!-- inside of tank -->
-            <rect x="50" y="38" width="188" height="326" fill="#effaff"/>
+            <rect id="tankBg" x="50" y="38" width="188" height="326" fill="#effaff"/>
             <g clip-path="url(#inside)">
               <path id="water" fill="url(#wg)" opacity=".95"/>
               <path id="surface" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" opacity=".85"/>
@@ -281,6 +294,7 @@ button:focus-visible,input:focus-visible,textarea:focus-visible,summary:focus-vi
                 <path d="M220 348 Q212 326 222 306 Q232 328 220 348Z" fill="#6fdc9a"/>
                 <path d="M150 350 q8 -12 16 0 z" fill="#ff9fb2" stroke="#16405c" stroke-width="2" stroke-linejoin="round"/>
               </g>
+              <g id="decor"></g>
               <g id="bubbles"></g>
               <g id="fish"></g>
               <rect id="pour" x="104" y="38" width="12" height="0" fill="#bdeefb" opacity=".9" rx="6"/>
@@ -288,6 +302,7 @@ button:focus-visible,input:focus-visible,textarea:focus-visible,summary:focus-vi
             <!-- glass -->
             <rect x="44" y="32" width="200" height="338" rx="14" fill="url(#glass)" stroke="#16405c" stroke-width="4"/>
             <line x1="52" x2="236" y1="38" y2="38" stroke="#ffb300" stroke-width="3" stroke-dasharray="7 7" opacity=".9"/>
+            <g id="floaters"></g>
             <g id="holes"></g>
             <g id="streams"></g>
             <g id="starmeter"></g>
