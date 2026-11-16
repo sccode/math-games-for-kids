@@ -1,0 +1,335 @@
+<title>Fish Tank Math</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Nunito:wght@600;700;800&display=swap">
+<style>
+/* Layout: one column on phones (tank above question); two columns (tank left, question right) from 860px.
+   One committed look: a sunny, sticker-like aquarium. Navy outlines, soft pastels, one bright water color. */
+:root{
+  --sky:#b9e7fb; --sky-2:#e6f8ff; --sand-bg:#fff4d6;
+  --ink:#16405c; --ink-soft:#4a7690; --card:#ffffff; --line:#bfe6f7;
+  --sea:#33b5ee; --sea-deep:#168fc9; --coral:#f2506b; --coral-deep:#b92e49; --sun:#ffd23f; --sun-deep:#e3a800;
+  --peach:#ffd9bf; --lemon:#fff1a6; --mint:#c8f2dc; --lilac:#e0d6ff;
+  --ok:#2fbf71; --ok-ink:#06391f; --bad:#ff6b6b;
+  --display:"Fredoka","Trebuchet MS",system-ui,sans-serif; --body:"Nunito",system-ui,-apple-system,"Segoe UI",sans-serif;
+  color-scheme:light;
+}
+*{box-sizing:border-box}
+html,body{min-height:100%}
+body{
+  margin:0; background:linear-gradient(var(--sky) 0%,var(--sky-2) 55%,var(--sand-bg) 100%) fixed,var(--sky-2);
+  color:var(--ink); font:700 16px/1.45 var(--body);
+  padding-block:12px 28px;
+  padding-left:max(16px,env(safe-area-inset-left,0px)); padding-right:max(16px,env(safe-area-inset-right,0px));
+}
+.wrap{max-width:1040px;margin:0 auto}
+h1,h2,h3{font-family:var(--display);font-weight:700;line-height:1.1;margin:0;text-wrap:balance}
+button{font:inherit;color:inherit;cursor:pointer}
+[hidden]{display:none!important}
+button:focus-visible,input:focus-visible{outline:4px solid var(--coral);outline-offset:2px}
+.icon{width:1.15em;height:1.15em;fill:var(--sun);stroke:var(--ink);stroke-width:1.6;stroke-linejoin:round;vertical-align:-.2em}
+.dim{color:var(--ink-soft);font-weight:700}
+
+.top{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:6px 0 14px}
+.brand{display:flex;align-items:center;gap:8px;font-family:var(--display);font-weight:700;font-size:1.5rem}
+.brand svg{width:44px;height:30px}
+.who{display:flex;align-items:center;gap:10px;background:var(--card);border:3px solid var(--ink);border-radius:999px;padding:3px 14px;font-weight:800;box-shadow:0 3px 0 rgba(22,64,92,.25)}
+.who .n{max-width:9ch;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+
+/* buttons */
+.btn{border:3px solid var(--ink);border-radius:16px;padding:10px 20px;font-weight:800;background:var(--sea);color:#fff;min-height:48px;box-shadow:0 4px 0 var(--ink);text-shadow:0 1px 0 rgba(22,64,92,.35)}
+.btn:hover{filter:brightness(1.06)}
+.btn:active{transform:translateY(3px);box-shadow:0 1px 0 var(--ink)}
+.btn.go{background:var(--coral);font-family:var(--display);font-size:1.5rem;padding:12px 44px;box-shadow:0 6px 0 var(--ink)}
+.btn.go:active{transform:translateY(4px);box-shadow:0 2px 0 var(--ink)}
+.btn:disabled{opacity:.5;cursor:not-allowed;filter:grayscale(.4);box-shadow:0 4px 0 var(--ink)}
+.btn.ghost{background:var(--card);color:var(--ink);text-shadow:none}
+
+/* home */
+.hero{display:grid;grid-template-columns:1fr auto;gap:10px 16px;align-items:center;margin:2px 0 18px}
+.hero h1{font-size:clamp(2rem,6.5vw,3.3rem)}
+.hero p{margin:6px 0 0;max-width:52ch}
+.hero .mascot{width:clamp(84px,22vw,150px);aspect-ratio:112/84;height:auto;animation:bob 3s ease-in-out infinite}
+@keyframes bob{50%{transform:translateY(-8px) rotate(-3deg)}}
+.cards{display:grid;gap:16px;grid-template-columns:1fr}
+.card{background:var(--card);border:3px solid var(--ink);border-radius:24px;padding:18px;min-width:0;box-shadow:0 6px 0 rgba(22,64,92,.22)}
+.card h2{font-size:1.35rem;margin-bottom:12px}
+.chips{display:flex;flex-wrap:wrap;gap:10px}
+.chip{min-width:56px;min-height:48px;padding:6px 14px;white-space:nowrap;border-radius:16px;border:3px solid var(--ink);background:var(--sky-2);font-weight:800;box-shadow:0 3px 0 rgba(22,64,92,.3)}
+.chip:hover{background:var(--lemon)}
+.chip[aria-pressed="true"]{background:var(--sun);box-shadow:0 3px 0 var(--sun-deep)}
+.addrow{display:flex;gap:10px;margin-top:14px;flex-wrap:wrap}
+.addrow input{flex:1 1 150px;min-width:0;min-height:48px;border-radius:16px;border:3px solid var(--ink);background:#fff;color:var(--ink);padding:8px 14px;font:inherit;font-weight:800}
+.addrow input::placeholder{color:var(--ink-soft);font-weight:700}
+.topics{margin:12px 0 0;font-size:.95rem}
+.startrow{display:flex;justify-content:center;margin:24px 0 4px}
+.chips.grades{display:grid;grid-template-columns:repeat(auto-fit,minmax(96px,1fr))}
+
+/* play */
+.stage{display:grid;gap:14px;grid-template-columns:1fr}
+.tankbox{background:linear-gradient(#e3f7ff,#c5ecfb);border:3px solid var(--ink);border-radius:26px;padding:8px;display:flex;justify-content:center;min-width:0;box-shadow:0 6px 0 rgba(22,64,92,.22)}
+#tank{width:100%;height:auto;max-height:36svh;display:block}
+.panel{display:grid;gap:12px;align-content:start;min-width:0}
+.hud{display:flex;gap:6px;justify-content:space-between;align-items:center;flex-wrap:wrap;font-weight:800}
+.hud .pill{background:var(--card);border:3px solid var(--ink);border-radius:999px;padding:1px 12px;font-size:.9rem;white-space:nowrap;font-variant-numeric:tabular-nums}
+.timer{height:16px;border-radius:99px;background:#fff;border:3px solid var(--ink);overflow:hidden}
+.timer i{display:block;height:100%;width:100%;background:var(--sea);transform-origin:left}
+.timer.low i{background:var(--coral)}
+.qcard{background:var(--card);border:3px solid var(--ink);border-radius:24px;padding:14px 16px 12px;min-height:110px;display:grid;gap:8px;align-content:center;box-shadow:0 5px 0 rgba(22,64,92,.22)}
+.q{font-family:var(--display);font-weight:600;font-size:clamp(1.55rem,5.2vw,2.2rem);line-height:1.25;overflow-wrap:anywhere}
+.std{font-size:.78rem;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-soft)}
+.answers{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.ans{min-height:66px;border-radius:20px;border:3px solid var(--ink);background:var(--peach);color:var(--ink);font-family:var(--display);font-weight:600;font-size:clamp(1.3rem,4.6vw,1.8rem);padding:8px 10px;display:flex;align-items:center;justify-content:center;gap:8px;overflow-wrap:anywhere;box-shadow:0 5px 0 var(--ink)}
+.ans:nth-child(2){background:var(--lemon)}.ans:nth-child(3){background:var(--mint)}.ans:nth-child(4){background:var(--lilac)}
+.ans:hover:not(:disabled){transform:translateY(-2px);box-shadow:0 7px 0 var(--ink)}
+.ans:active:not(:disabled){transform:translateY(3px);box-shadow:0 2px 0 var(--ink)}
+.ans:disabled{cursor:default}
+.ans.right{background:var(--ok)!important;color:var(--ok-ink)}
+.ans.wrong{background:var(--bad)!important;color:#fff}
+.ans.dimmed{opacity:.5}
+.quit{justify-self:start;font-size:.9rem;min-height:40px;padding:6px 14px}
+.toast{min-height:1.5em;font-weight:800;text-align:center;font-size:1.05rem}
+
+/* fractions */
+.frac{display:inline-flex;flex-direction:column;align-items:center;vertical-align:middle;line-height:1.05;margin:0 .12em;font-size:.82em}
+.frac .n{border-bottom:.09em solid currentColor;padding:0 .2em .06em}
+.frac .d{padding:.06em .2em 0}
+
+/* result */
+.res{display:grid;gap:16px;max-width:640px;margin:8px auto 0;text-align:center}
+.res h1{font-size:clamp(2.1rem,7.5vw,3.2rem)}
+.bigstars{display:flex;justify-content:center;gap:10px}
+.bigstars svg{width:clamp(52px,15vw,80px);height:auto;fill:#fff;stroke:var(--ink);stroke-width:1.2;stroke-linejoin:round}
+.bigstars svg.lit{fill:var(--sun);animation:pop .55s cubic-bezier(.2,1.6,.4,1) both}
+@keyframes pop{from{transform:scale(.2) rotate(-30deg);opacity:0}to{transform:none;opacity:1}}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.stat{background:var(--card);border:3px solid var(--ink);border-radius:18px;padding:8px 6px;box-shadow:0 4px 0 rgba(22,64,92,.22)}
+.stat b{display:block;font-family:var(--display);font-size:1.8rem;font-variant-numeric:tabular-nums}
+.stat span{font-size:.85rem}
+.missed{text-align:left;display:grid;gap:8px}
+.missed h2{font-size:1.15rem}
+.mrow{background:var(--card);border:3px solid var(--ink);border-radius:16px;padding:8px 14px;display:flex;justify-content:space-between;gap:12px;align-items:center;flex-wrap:wrap}
+.mrow .mq{min-width:0;overflow-wrap:anywhere}
+.mrow .ma{font-weight:800;color:#0b7a42;white-space:nowrap}
+.actions{display:flex;flex-wrap:wrap;gap:12px;justify-content:center}
+
+
+/* profiles, grade progress, save code */
+[hidden]{display:none!important}
+button:focus-visible,input:focus-visible,textarea:focus-visible,summary:focus-visible{outline:4px solid var(--coral);outline-offset:2px}
+.chip.gchip{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;min-height:62px}
+.gstars{display:flex;gap:2px}
+.gstars svg{width:15px;height:15px;fill:#e3eef4;stroke:#7a9bb0;stroke-width:1.6;stroke-linejoin:round}
+.gstars svg.on{fill:var(--sun);stroke:var(--ink)}
+.totals{margin:12px 0 0;font-weight:800;overflow-wrap:anywhere}
+.msg{margin:12px 0 0;padding:8px 12px;border-radius:14px;border:3px solid var(--ink);font-weight:800;overflow-wrap:anywhere}
+.msg.ok{background:var(--mint)}.msg.err{background:#ffe0e0}
+.msg[hidden],.notice[hidden]{display:none}
+.notice{margin:16px auto 0;max-width:640px;padding:8px 14px;border-radius:14px;border:3px solid var(--ink);background:var(--lemon);font-weight:800;text-align:center}
+.manage{margin-top:14px}
+.manage summary{cursor:pointer;min-height:44px;display:flex;align-items:center;font-weight:800;color:var(--ink-soft);border-radius:12px;padding:0 4px}
+.mbody{display:grid;gap:10px;padding-top:4px}
+.mfor{margin:0;overflow-wrap:anywhere}
+.mbody .addrow{margin-top:0}
+.mbody .actions{justify-content:flex-start}
+.mbody p{margin:0;font-weight:800;overflow-wrap:anywhere}
+.btn.danger{background:var(--coral)}
+.shopcard{margin-top:16px}
+.shoprow{display:flex;align-items:center;gap:12px;padding:10px 0;border-top:2px dashed var(--line)}
+.shoprow .ctext{flex:1;min-width:0;font-size:.95rem;line-height:1.3}
+.shoprow .have{font-weight:700;color:var(--ink-soft);font-size:.85rem}
+.btn.buy{min-width:84px;padding:8px 12px}
+.cicon{flex:none;width:40px;height:40px;border-radius:12px;border:3px solid var(--ink);display:grid;place-items:center;font-weight:900;font-size:1.2rem;background:var(--lemon)}
+.c-fifty .cicon,.cicon.c-fifty{background:var(--lilac)}.cicon.c-skip{background:var(--peach)}.cicon.c-plug{background:var(--mint)}.cicon.c-freeze{background:var(--sky)}
+.cardbar{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:10px}
+.mcard{display:flex;flex-direction:column;align-items:center;gap:1px;padding:6px 2px;min-height:64px;border:3px solid var(--ink);border-radius:14px;background:var(--card);font-weight:800;color:var(--ink);box-shadow:0 3px 0 rgba(22,64,92,.3)}
+.mcard .cicon{width:28px;height:28px;border-width:2px;font-size:.95rem;border-radius:9px}
+.mcard.c-fifty .cicon{background:var(--lilac)}.mcard.c-skip .cicon{background:var(--peach)}.mcard.c-plug .cicon{background:var(--mint)}.mcard.c-freeze .cicon{background:var(--sky)}
+.mcard .cname{font-size:.78rem}.mcard .ccount{font-size:.72rem;color:var(--ink-soft)}
+.mcard:disabled{opacity:.45;cursor:not-allowed}
+.mcard:not(:disabled):active{transform:translateY(2px)}
+.timer.frozen i{background:#8fe3ff;background-image:repeating-linear-gradient(45deg,#fff6 0 6px,transparent 6px 12px)}
+.btn.ghost.danger{color:var(--coral-deep)}
+.confirm{display:grid;gap:10px;border:3px dashed var(--coral);border-radius:16px;padding:12px;background:#fff5f5}
+.codecard{margin-top:24px;display:grid;gap:12px;justify-items:start}
+.codecard>*{margin:0;max-width:100%}
+.codecard #codeOut{display:grid;gap:10px;justify-items:start;width:100%}
+.codecard .msg{width:100%}
+.lbl{font-weight:800;margin-top:6px!important}
+.codebox{width:100%;min-height:48px;border-radius:16px;border:3px solid var(--ink);background:#fff;color:var(--ink);padding:8px 12px;font:700 .85rem/1.4 ui-monospace,Menlo,Consolas,monospace;overflow-wrap:anywhere;word-break:break-all;resize:vertical}
+
+@media (min-width:860px){
+  .cards{grid-template-columns:1fr 1.3fr}
+  .stage{grid-template-columns:minmax(300px,420px) 1fr;align-items:start}
+  #tank{max-height:78svh}
+  .hud .pill{font-size:1rem;padding:3px 14px}
+}
+@media (prefers-reduced-motion:reduce){.bigstars svg.lit{animation:none}.hero .mascot{animation:none}.ans:hover:not(:disabled){transform:none}}
+</style>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="star" viewBox="0 0 24 24"><path d="M12 1.8l2.9 6.2 6.8.8-5 4.7 1.3 6.7L12 16.7 6 20.2l1.3-6.7-5-4.7 6.8-.8z"/></symbol>
+  <symbol id="fishy" viewBox="-56 -42 112 84">
+    <path d="M-27 0L-50-19Q-42 0-50 19Z" fill="#ffb74d" stroke="#16405c" stroke-width="3" stroke-linejoin="round"/>
+    <path d="M-8-17Q4-38 22-15Z" fill="#ffb74d" stroke="#16405c" stroke-width="3" stroke-linejoin="round"/>
+    <ellipse rx="30" ry="21" fill="#ff9a3d" stroke="#16405c" stroke-width="3"/>
+    <ellipse cx="3" cy="9" rx="21" ry="8" fill="#ffd9a6"/>
+    <path d="M-6-16Q-12 0-6 17" fill="none" stroke="#ff7a1a" stroke-width="3" stroke-linecap="round" opacity=".7"/>
+    <circle cx="10" cy="7" r="5" fill="#ff7f93" opacity=".65"/>
+    <circle cx="16" cy="-5" r="7" fill="#fff" stroke="#16405c" stroke-width="2.5"/>
+    <circle cx="18" cy="-4.5" r="3.8" fill="#16405c"/><circle cx="19.5" cy="-6.5" r="1.4" fill="#fff"/>
+    <path d="M21 5Q25 11 29 4" fill="none" stroke="#16405c" stroke-width="2.4" stroke-linecap="round"/>
+  </symbol>
+</svg>
+
+<div class="wrap">
+  <header class="top">
+    <div class="brand"><svg aria-hidden="true"><use href="#fishy"/></svg>Fish Tank Math</div>
+    <div class="who" id="who" hidden><span class="n" id="whoName"></span><span><svg class="icon"><use href="#star"/></svg> <b id="whoStars">0</b></span></div>
+  </header>
+
+  <main>
+    <!-- HOME -->
+    <section id="home">
+      <div class="hero">
+        <div>
+          <h1>Answer fast. Fill the tank!</h1>
+          <p class="dim">The tank has leaks. Every right answer pours water in. Keep the water above a hole to earn its star.</p>
+        </div>
+        <svg class="mascot" aria-hidden="true"><use href="#fishy"/></svg>
+      </div>
+      <div class="cards">
+        <div class="card">
+          <h2>Who is playing?</h2>
+          <div class="chips" id="players"></div>
+          <form class="addrow" id="addForm">
+            <input id="newName" type="text" placeholder="New player name" autocomplete="off" aria-label="New player name">
+            <button class="btn" type="submit">Add player</button>
+          </form>
+          <p class="msg" id="pMsg" role="status" aria-live="polite" hidden></p>
+          <details class="manage" id="manage" hidden>
+            <summary>Manage players</summary>
+            <div class="mbody">
+              <p class="dim mfor" id="mFor"></p>
+              <form class="addrow" id="renForm">
+                <input id="renName" type="text" autocomplete="off" aria-label="New name for the selected player">
+                <button class="btn ghost" type="submit">Rename</button>
+              </form>
+              <div id="delArea"><button class="btn ghost danger" id="delBtn" type="button">Delete this player</button></div>
+              <div class="confirm" id="delConfirm" hidden>
+                <p id="delQ"></p>
+                <div class="actions">
+                  <button class="btn danger" id="delYes" type="button">Yes, delete</button>
+                  <button class="btn ghost" id="delNo" type="button">Keep player</button>
+                </div>
+              </div>
+            </div>
+          </details>
+        </div>
+        <div class="card">
+          <h2>Pick a grade</h2>
+          <div class="chips grades" id="grades"></div>
+          <p class="totals" id="totals"></p>
+          <p class="topics dim" id="topics"></p>
+        </div>
+      </div>
+      <div class="startrow"><button class="btn go" id="playBtn" type="button">Play!</button></div>
+      <div class="card shopcard" id="shopCard" hidden>
+        <h2>Magic cards</h2>
+        <p class="dim">Points you earn in rounds can buy cards. Use each card once per round. You have <b id="balance">0</b> points to spend.</p>
+        <div id="shopList"></div>
+      </div>
+      <p class="notice" id="notice" role="status" hidden>Heads up: this page cannot save your progress here, so it will be lost when you close it. Make a save code below to keep it.</p>
+      <div class="card codecard" id="codeCard">
+        <h2>Save code</h2>
+        <p class="dim">Your stars are kept on this device. Make a save code, keep it in a note or text it to yourself, and paste it back here any time to get everything back.</p>
+        <button class="btn" id="mkCode" type="button">Make my save code</button>
+        <div id="codeOut" hidden>
+          <textarea class="codebox" id="codeText" readonly rows="4" spellcheck="false" aria-label="Your save code"></textarea>
+          <button class="btn ghost" id="copyBtn" type="button">Copy code</button>
+        </div>
+        <label class="lbl" for="pasteCode">Have a code? Paste it here</label>
+        <textarea class="codebox" id="pasteCode" rows="3" placeholder="FTM1-..." spellcheck="false" autocomplete="off" autocapitalize="off" autocorrect="off"></textarea>
+        <button class="btn" id="restoreBtn" type="button">Restore</button>
+        <p class="msg" id="codeMsg" role="status" aria-live="polite" hidden></p>
+      </div>
+    </section>
+
+    <!-- PLAY -->
+    <section id="play" hidden>
+      <div class="stage">
+        <div class="tankbox">
+          <svg id="tank" viewBox="0 0 380 420" role="img" aria-label="Fish tank with leaking holes">
+            <defs>
+              <linearGradient id="wg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#8fe3ff"/><stop offset="1" stop-color="#33b5ee"/></linearGradient>
+              <linearGradient id="glass" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#fff" stop-opacity=".55"/><stop offset=".18" stop-color="#fff" stop-opacity=".08"/><stop offset="1" stop-color="#fff" stop-opacity=".22"/></linearGradient>
+              <clipPath id="inside"><rect x="50" y="38" width="188" height="326"/></clipPath>
+            </defs>
+            <!-- floor and cabinet -->
+            <rect x="0" y="394" width="380" height="26" fill="#ffe9bf"/>
+            <rect x="0" y="392" width="380" height="4" fill="#16405c"/>
+            <rect x="36" y="366" width="216" height="28" rx="8" fill="#ffcf8b" stroke="#16405c" stroke-width="3"/>
+            <!-- inside of tank -->
+            <rect x="50" y="38" width="188" height="326" fill="#effaff"/>
+            <g clip-path="url(#inside)">
+              <path id="water" fill="url(#wg)" opacity=".95"/>
+              <path id="surface" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" opacity=".85"/>
+              <g id="sand">
+                <path d="M50 348 Q94 338 140 346 T238 344 V364 H50Z" fill="#ffe29a"/>
+                <circle cx="76" cy="352" r="4" fill="#ffc9a3"/><circle cx="196" cy="354" r="3.5" fill="#c9b8ff"/><circle cx="214" cy="350" r="3" fill="#ffc9a3"/>
+                <path d="M68 348 Q56 322 68 300 Q80 322 68 348Z" fill="#6fdc9a"/><path d="M82 350 Q74 332 84 316 Q92 334 82 350Z" fill="#55c987"/>
+                <path d="M220 348 Q212 326 222 306 Q232 328 220 348Z" fill="#6fdc9a"/>
+                <path d="M150 350 q8 -12 16 0 z" fill="#ff9fb2" stroke="#16405c" stroke-width="2" stroke-linejoin="round"/>
+              </g>
+              <g id="bubbles"></g>
+              <g id="fish"></g>
+              <rect id="pour" x="104" y="38" width="12" height="0" fill="#bdeefb" opacity=".9" rx="6"/>
+            </g>
+            <!-- glass -->
+            <rect x="44" y="32" width="200" height="338" rx="14" fill="url(#glass)" stroke="#16405c" stroke-width="4"/>
+            <line x1="52" x2="236" y1="38" y2="38" stroke="#ffb300" stroke-width="3" stroke-dasharray="7 7" opacity=".9"/>
+            <g id="holes"></g>
+            <g id="streams"></g>
+            <g id="starmeter"></g>
+          </svg>
+        </div>
+
+        <div class="panel">
+          <div class="hud">
+            <span class="pill" id="qnum">Question 1 of 10</span>
+            <span class="pill"><span id="pts">0</span> points</span>
+            <span class="pill" id="streak">Streak 0</span>
+          </div>
+          <div class="timer" id="timer"><i id="timerBar"></i></div>
+          <div class="qcard">
+            <div class="std" id="std"></div>
+            <div class="q" id="q" aria-live="polite"></div>
+          </div>
+          <div class="answers" id="answers"></div>
+          <div class="cardbar" id="cardBar"></div>
+          <div class="toast" id="toast" aria-live="polite"></div>
+          <button class="btn ghost quit" id="quitBtn" type="button">End round</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- RESULT -->
+    <section id="result" hidden>
+      <div class="res">
+        <h1 id="resTitle"></h1>
+        <div class="bigstars" id="bigstars" aria-label="Stars earned"></div>
+        <div class="stats">
+          <div class="stat"><b id="rPts">0</b><span>points</span></div>
+          <div class="stat"><b id="rCorrect">0</b><span>correct</span></div>
+          <div class="stat"><b id="rStreak">0</b><span>best streak</span></div>
+        </div>
+        <p class="totals" id="rBal"></p>
+        <div class="missed" id="missed" hidden><h2>Let's look at these again</h2><div id="missedList"></div></div>
+        <div class="actions">
+          <button class="btn go" id="againBtn" type="button">Play again</button>
+          <button class="btn ghost" id="homeBtn" type="button">Change player or grade</button>
+        </div>
+      </div>
+    </section>
+  </main>
+</div>
