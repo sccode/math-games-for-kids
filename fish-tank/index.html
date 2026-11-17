@@ -1002,7 +1002,7 @@ T('7.SP.2','Inferences from a sample',()=>{
 T('7.SP.3','Compare two data sets',()=>{
   const d=R(2,5),k=R(2,4),m1=R(10,20);return[`Class A has a mean of ${m1} and a mean absolute deviation of ${d}. Class B has a mean of ${m1+k*d} and the same mean absolute deviation. The difference between the means is how many times the mean absolute deviation?`,k,[k+1,k-1>0?k-1:k+2,k*d,d]];}),
 T('7.SP.4','Compare means of two samples',()=>{
-  const mk=m=>{const a=m+R(-3,3),b=m+R(-3,3),c=m+R(-3,3);return[a,b,c,4*m-a-b-c];};
+  const mk=m=>{let a,b,c;do{a=m+R(-3,3);b=m+R(-3,3);c=m+R(-3,3);}while(4*m-a-b-c<1);return[a,b,c,4*m-a-b-c];};
   const mA=R(8,16),dd=R(2,6),mB=mA+dd,A=mk(mA),B=mk(mB);
   return[`Sample A: ${A.join(', ')}. Sample B: ${B.join(', ')}. How much greater is the mean of Sample B than the mean of Sample A?`,dd,[dd+1,dd-1>0?dd-1:dd+2,Math.max(...B)-Math.max(...A)===dd?dd+3:Math.max(...B)-Math.max(...A)>0?Math.max(...B)-Math.max(...A):dd+4,mB]];}),
 T('7.SP.6','Experimental probability',()=>{
