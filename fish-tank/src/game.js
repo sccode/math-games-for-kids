@@ -229,11 +229,12 @@ function mergeCode(list){
 // ---------- tuning (checked with a simulation: all right and quick earns every star; 9 of 10 at a normal pace earns most) ----------
 // holes are heights as a fraction of the tank; water above a hole leaks out of it
 const MODES={
+  high:{holes:[.15,.37,.58,.80],T:40,P:.23,c:.0128},   // grade 9: 4 holes, 40 s (leak scaled so each question costs the same)
   early:{holes:[.15,.475,.80],T:28,P:.21,c:.0158},   // K-2: 3 holes, a little more time (28 s)
   elem:{holes:[.15,.475,.80],T:20,P:.21,c:.022},   // grades 3-5: 3 holes, 20 s per question
   mid :{holes:[.15,.37,.58,.80],T:30,P:.23,c:.017} // grades 6-8: 4 holes, 30 s per question
 };
-const modeFor=g=>g<=2?MODES.early:g<=5?MODES.elem:MODES.mid;
+const modeFor=g=>g<=2?MODES.early:g<=5?MODES.elem:g>=9?MODES.high:MODES.mid;
 const ROUND=10, YB=364, H=326, X0=50, X1=238, WALL=244, GROUND=394;
 const yOf=f=>YB-f*H;
 
