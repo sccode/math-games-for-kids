@@ -13,6 +13,10 @@ const fmt=s=>String(s).replace(/\[\[(.+?)\|(.+?)\]\]/g,'<span class="frac"><span
 // v2: same, plus v:2 and a last-used "grade" for every player.
 const KEY='fishtankmath.v1',VER=2,MAXP=30,MAXNAME=12,NUMCAP=999999999;
 const gmax=gr=>gr<=5?3:4;
+const glabel=gr=>gr===0?'Kindergarten':'Grade '+gr;
+const gshort=gr=>gr===0?'K':'Grade '+gr;
+// order of the grade digits inside a save code: kept as it was (3..8) with newer grades added at the end
+const SAVEORD=[3,4,5,6,7,8,0,1,2,9,10,11,12].filter(gr=>GRADES.includes(gr));
 // magic cards: bought with points, used during a round (each card at most once per round)
 const CARDS=[
   {id:'fifty', name:'50/50', cost:40, icon:'½', desc:'Takes away two wrong answers.'},
@@ -165,7 +169,7 @@ const b64d=t=>{
 };
 const hash32=s=>{let h=2166136261;for(let i=0;i<s.length;i++){h^=s.charCodeAt(i);h=Math.imul(h,16777619)>>>0;}return h.toString(36).padStart(7,'0');};
 function makeCode(){
-  const p=Object.keys(store.players).map(n=>{const q=store.players[n];return[n,q.stars,q.points,q.rounds,q.grade,GRADES.map(gr=>q.best[gr]||0).join(''),q.spent,CARDS.map(k=>q.cards[k.id]).join(''),q.starsSpent,bits(q.own),bits(q.on)];});
+  const p=Object.keys(store.players).map(n=>{const q=store.players[n];return[n,q.stars,q.points,q.rounds,q.grade,SAVEORD.map(gr=>q.best[gr]||0).join(''),q.spent,CARDS.map(k=>q.cards[k.id]).join(''),q.starsSpent,bits(q.own),bits(q.on)];});
   const body=b64e(JSON.stringify({v:1,p}));
   return 'FTM1-'+hash32(body)+'-'+body;
 }
@@ -186,7 +190,7 @@ function parseCode(raw){
     if(!Array.isArray(e))continue;
     const name=cleanName(e[0]);if(!name)continue;
     const bs=typeof e[5]==='string'?e[5]:'',best={};
-    GRADES.forEach((gr,i)=>{const v=cnum(Number(bs[i]),gmax(gr));if(v)best[gr]=v;});
+    SAVEORD.forEach((gr,i)=>{const v=cnum(Number(bs[i]),gmax(gr));if(v)best[gr]=v;});
     const cs=typeof e[7]==='string'?e[7]:'',cards={};CARDS.forEach((k,i)=>{cards[k.id]=cnum(Number(cs[i]),CMAX);});
     const points=cnum(e[2]);
     out.push(normShop({name,stars:cnum(e[1]),points,rounds:cnum(e[3]),grade:GRADES.includes(e[4])?e[4]:4,best,spent:Math.min(cnum(e[6]),points),cards,starsSpent:cnum(e[8]),own:fromBits(e[9]),on:fromBits(e[10])}));
@@ -225,10 +229,11 @@ function mergeCode(list){
 // ---------- tuning (checked with a simulation: all right and quick earns every star; 9 of 10 at a normal pace earns most) ----------
 // holes are heights as a fraction of the tank; water above a hole leaks out of it
 const MODES={
+  early:{holes:[.15,.475,.80],T:28,P:.21,c:.0158},   // K-2: 3 holes, a little more time (28 s)
   elem:{holes:[.15,.475,.80],T:20,P:.21,c:.022},   // grades 3-5: 3 holes, 20 s per question
   mid :{holes:[.15,.37,.58,.80],T:30,P:.23,c:.017} // grades 6-8: 4 holes, 30 s per question
 };
-const modeFor=g=>g<=5?MODES.elem:MODES.mid;
+const modeFor=g=>g<=2?MODES.early:g<=5?MODES.elem:MODES.mid;
 const ROUND=10, YB=364, H=326, X0=50, X1=238, WALL=244, GROUND=394;
 const yOf=f=>YB-f*H;
 
@@ -249,8 +254,8 @@ function renderHome(){
   GRADES.forEach(gr=>{
     const b=document.createElement('button'),mx=gmax(gr),best=p?Math.min(p.best[gr]||0,mx):0;
     b.type='button';b.className='chip gchip';b.dataset.grade=gr;b.dataset.best=best;
-    b.setAttribute('aria-pressed',gr===store.grade);b.setAttribute('aria-label',`Grade ${gr}, best ${best} of ${mx} stars`);
-    const t=document.createElement('span');t.textContent='Grade '+gr;b.appendChild(t);
+    b.setAttribute('aria-pressed',gr===store.grade);b.setAttribute('aria-label',`${glabel(gr)}, best ${best} of ${mx} stars`);
+    const t=document.createElement('span');t.textContent=gshort(gr);b.appendChild(t);
     const st=document.createElement('span');st.className='gstars';st.setAttribute('aria-hidden','true');
     for(let i=0;i<mx;i++){const s=el('svg',{viewBox:'0 0 24 24'},null);el('use',{href:'#star'},s);if(i<best)s.setAttribute('class','on');st.appendChild(s);}
     b.appendChild(st);
