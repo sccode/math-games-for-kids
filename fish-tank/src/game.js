@@ -19,10 +19,10 @@ const gshort=gr=>gr===0?'K':'Grade '+gr;
 const SAVEORD=[3,4,5,6,7,8,0,1,2,9,10,11,12].filter(gr=>GRADES.includes(gr));
 // magic cards: bought with points, used during a round (each card at most once per round)
 const CARDS=[
-  {id:'fifty', name:'50/50', cost:360, icon:'½', desc:'Takes away two wrong answers.'},
-  {id:'skip',  name:'Skip',  cost:300, icon:'»', desc:'Skip a question with no penalty.'},
-  {id:'plug',  name:'Plug',  cost:720, icon:'●', desc:'Plugs the biggest leak for 3 questions.'},
-  {id:'freeze',name:'Freeze',cost:480, icon:'❄', desc:'Stops the timer for 10 seconds.'}];
+  {id:'fifty', name:'50/50', cost:45, icon:'½', desc:'Takes away two wrong answers.'},
+  {id:'skip',  name:'Skip',  cost:35, icon:'»', desc:'Skip a question with no penalty.'},
+  {id:'plug',  name:'Plug',  cost:90, icon:'●', desc:'Plugs the biggest leak for 3 questions.'},
+  {id:'freeze',name:'Freeze',cost:60, icon:'❄', desc:'Stops the timer for 10 seconds.'}];
 // ---------- sound (made with the Web Audio API, no files; starts after the first tap) ----------
 const MUTEKEY='fishtankmath.mute';
 let muted=false;try{muted=localStorage.getItem(MUTEKEY)==='1';}catch(e){}
@@ -602,7 +602,7 @@ function answer(i){
   if(right){
     const f=g.tLeft/g.mode.T;
     g.pending+=g.mode.P*(.6+.8*f);g.streak++;g.best=Math.max(g.best,g.streak);g.correct++;
-    const pts=10+Math.round(10*f)+Math.min(g.streak-1,5)*2;g.points+=pts;
+    const pts=1+(f>.5?1:0)+(g.streak>=3?1:0);   // 1 point, +1 if fast, +1 on a streak of 3 or moreg.points+=pts;
     $('toast').textContent=f>.6?`Fast! +${pts}`:`Correct! +${pts}`;g.fb=.9;sfx('right',g.streak-1);
   }else{
     sfx('wrong');g.streak=0;g.missed.push({q:g.q.q,a:g.q.a,std:g.q.std});
@@ -649,7 +649,7 @@ function loop(ts){
   if(g.quitArm>0){g.quitArm-=dt;if(g.quitArm<=0){g.quitArm=0;$('quitBtn').textContent='End round';}}
   // water in
   const add=Math.min(g.pending,.3*dt);g.pending-=add;g.level=Math.min(1,g.level+add);
-  if(g.level>=1&&!g.everFull){g.everFull=true;g.points+=20;$('pts').textContent=g.points;$('toast').textContent+='  Tank full! +20';sfx('full');}
+  if(g.level>=1&&!g.everFull){g.everFull=true;g.points+=5;$('pts').textContent=g.points;$('toast').textContent+='  Tank full! +5';sfx('full');}
   // water out (only through covered holes)
   if(g.state!=='settle'){
     let s=0;g.mode.holes.forEach((h,i)=>{if(g.level>h&&!g.plugs.some(x=>x.i===i))s+=Math.sqrt(g.level-h);});
