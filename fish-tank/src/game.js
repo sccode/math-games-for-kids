@@ -19,10 +19,10 @@ const gshort=gr=>gr===0?'K':'Grade '+gr;
 const SAVEORD=[3,4,5,6,7,8,0,1,2,9,10,11,12].filter(gr=>GRADES.includes(gr));
 // magic cards: bought with points, used during a round (each card at most once per round)
 const CARDS=[
-  {id:'fifty', name:'50/50', cost:150, icon:'½', desc:'Takes away two wrong answers.'},
-  {id:'skip',  name:'Skip',  cost:120, icon:'»', desc:'Skip a question with no penalty.'},
-  {id:'plug',  name:'Plug',  cost:300, icon:'●', desc:'Plugs the biggest leak for 3 questions.'},
-  {id:'freeze',name:'Freeze',cost:200, icon:'❄', desc:'Stops the timer for 10 seconds.'}];
+  {id:'fifty', name:'50/50', cost:360, icon:'½', desc:'Takes away two wrong answers.'},
+  {id:'skip',  name:'Skip',  cost:300, icon:'»', desc:'Skip a question with no penalty.'},
+  {id:'plug',  name:'Plug',  cost:720, icon:'●', desc:'Plugs the biggest leak for 3 questions.'},
+  {id:'freeze',name:'Freeze',cost:480, icon:'❄', desc:'Stops the timer for 10 seconds.'}];
 // ---------- sound (made with the Web Audio API, no files; starts after the first tap) ----------
 const MUTEKEY='fishtankmath.mute';
 let muted=false;try{muted=localStorage.getItem(MUTEKEY)==='1';}catch(e){}
@@ -75,19 +75,19 @@ const CMAX=9;
 const P=(body,fin,belly,stripe,rainbow)=>({body,fin,belly,stripe,rainbow:!!rainbow});
 const ITEMS=[
   {id:'goldie',kind:'fish',name:'Goldie',cost:0, pal:P('#ff9a3d','#ffb74d','#ffd9a6','#ff7a1a')},
-  {id:'bluey', kind:'fish',name:'Bluey', cost:10,pal:P('#4fa8ff','#8cc8ff','#d6ecff','#2f7fe0')},
-  {id:'minty', kind:'fish',name:'Minty', cost:10,pal:P('#3fcf8e','#7fe3b3','#d3f7e5','#1fa86b')},
-  {id:'pinky', kind:'fish',name:'Pinky', cost:20,pal:P('#ff7fb0','#ffa8cb','#ffe0ee','#e0498a')},
-  {id:'violet',kind:'fish',name:'Violet',cost:20,pal:P('#9b7bff','#bda8ff','#e9e1ff','#6f4fdc')},
-  {id:'rainbow',kind:'fish',name:'Rainbow',cost:40,pal:P('#ffd23f','#ff9fb2','#fff6c9','#f2506b',true)},
-  {id:'starfish',kind:'decor',name:'Starfish',cost:8, desc:'A cute starfish on the sand.'},
-  {id:'chest',   kind:'decor',name:'Treasure chest',cost:20,desc:'Shiny treasure for the fish.'},
-  {id:'bubbler', kind:'decor',name:'Bubbler',cost:25,desc:'Makes lots more bubbles.'},
-  {id:'castle',  kind:'decor',name:'Castle',cost:30,desc:'A little castle to swim around.'},
-  {id:'duck',    kind:'decor',name:'Rubber duck',cost:30,desc:'Floats on top of the water.'},
-  {id:'sunset',kind:'bg',name:'Sunset wall',cost:10,desc:'A warm peachy back wall.',color:'#ffe6d6'},
-  {id:'mint',  kind:'bg',name:'Mint wall',  cost:10,desc:'A fresh mint back wall.',color:'#dcf8ea'},
-  {id:'lilac', kind:'bg',name:'Lilac wall', cost:10,desc:'A soft lilac back wall.',color:'#ebe3ff'}];
+  {id:'bluey', kind:'fish',name:'Bluey', cost:8,pal:P('#4fa8ff','#8cc8ff','#d6ecff','#2f7fe0')},
+  {id:'minty', kind:'fish',name:'Minty', cost:8,pal:P('#3fcf8e','#7fe3b3','#d3f7e5','#1fa86b')},
+  {id:'pinky', kind:'fish',name:'Pinky', cost:12,pal:P('#ff7fb0','#ffa8cb','#ffe0ee','#e0498a')},
+  {id:'violet',kind:'fish',name:'Violet',cost:12,pal:P('#9b7bff','#bda8ff','#e9e1ff','#6f4fdc')},
+  {id:'rainbow',kind:'fish',name:'Rainbow',cost:30,pal:P('#ffd23f','#ff9fb2','#fff6c9','#f2506b',true)},
+  {id:'starfish',kind:'decor',name:'Starfish',cost:5, desc:'A cute starfish on the sand.'},
+  {id:'chest',   kind:'decor',name:'Treasure chest',cost:14,desc:'Shiny treasure for the fish.'},
+  {id:'bubbler', kind:'decor',name:'Bubbler',cost:18,desc:'Makes lots more bubbles.'},
+  {id:'castle',  kind:'decor',name:'Castle',cost:24,desc:'A little castle to swim around.'},
+  {id:'duck',    kind:'decor',name:'Rubber duck',cost:24,desc:'Floats on top of the water.'},
+  {id:'sunset',kind:'bg',name:'Sunset wall',cost:8,desc:'A warm peachy back wall.',color:'#ffe6d6'},
+  {id:'mint',  kind:'bg',name:'Mint wall',  cost:8,desc:'A fresh mint back wall.',color:'#dcf8ea'},
+  {id:'lilac', kind:'bg',name:'Lilac wall', cost:8,desc:'A soft lilac back wall.',color:'#ebe3ff'}];
 const ITEM=Object.fromEntries(ITEMS.map(i=>[i.id,i]));
 const BGDEFAULT='#effaff';
 const sbal=p=>Math.max(0,p.stars-p.starsSpent);
