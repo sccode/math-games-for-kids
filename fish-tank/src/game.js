@@ -19,10 +19,10 @@ const gshort=gr=>gr===0?'K':'Grade '+gr;
 const SAVEORD=[3,4,5,6,7,8,0,1,2,9,10,11,12].filter(gr=>GRADES.includes(gr));
 // magic cards: bought with points, used during a round (each card at most once per round)
 const CARDS=[
-  {id:'fifty', name:'50/50', cost:40, icon:'½', desc:'Takes away two wrong answers.'},
-  {id:'skip',  name:'Skip',  cost:30, icon:'»', desc:'Skip a question with no penalty.'},
-  {id:'plug',  name:'Plug',  cost:80, icon:'●', desc:'Plugs the biggest leak for 3 questions.'},
-  {id:'freeze',name:'Freeze',cost:50, icon:'❄', desc:'Stops the timer for 10 seconds.'}];
+  {id:'fifty', name:'50/50', cost:150, icon:'½', desc:'Takes away two wrong answers.'},
+  {id:'skip',  name:'Skip',  cost:120, icon:'»', desc:'Skip a question with no penalty.'},
+  {id:'plug',  name:'Plug',  cost:300, icon:'●', desc:'Plugs the biggest leak for 3 questions.'},
+  {id:'freeze',name:'Freeze',cost:200, icon:'❄', desc:'Stops the timer for 10 seconds.'}];
 // ---------- sound (made with the Web Audio API, no files; starts after the first tap) ----------
 const MUTEKEY='fishtankmath.mute';
 let muted=false;try{muted=localStorage.getItem(MUTEKEY)==='1';}catch(e){}
