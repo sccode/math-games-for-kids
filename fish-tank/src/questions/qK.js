@@ -3,9 +3,9 @@
 const KE=['🍎','🐟','⭐','🍪','🎈','🐱','🌸','🚗'];
 const kn=(e,n)=>e.repeat(n);
 const kNear=(n,lo,hi)=>[n+1,n-1,n+2,n-2,n+3,n-3].filter(x=>x>=lo&&x<=hi);
-const kRank=['ant','mouse','cat','dog','person','car','house','bus','tree','giraffe','whale','airplane'];
-const kShapes={circle:'●',square:'■',triangle:'▲',rectangle:'▬',hexagon:'⬢'};
-const kName=['circle','square','triangle','rectangle','hexagon'];
+const kRank=['ant','mouse','cat','person','car','bus','house','mountain'];   // clearly increasing in size
+const kShapes={circle:'●',square:'■',triangle:'▲',rectangle:'▬'};
+const kName=['circle','square','triangle','rectangle'];
 const kSides={triangle:3,square:4,rectangle:4,pentagon:5,hexagon:6};
 const kT=(h,m)=>{h=((h-1+Math.floor(m/60))%12+12)%12+1;m=((m%60)+60)%60;return `${h}:${m<10?'0'+m:m}`;};
 const kU=(n,w)=>n===1?w:w+'s';
@@ -115,7 +115,7 @@ T('2.NBT.2','Skip counting',()=>{
   const e=a+4*st;return[`${a}, ${a+st}, ${a+2*st}, ${a+3*st}, ?`,e,[e+st,e-st,e+1,e+2*st]];}),
 T('2.NBT.3','Read and write numbers',()=>{
   const h=R(1,9),t=R(0,9),o=R(1,9),n=h*100+t*10+o;
-  return[`${h*100} + ${t*10} + ${o} = ?`,n,[h*100+t+o,h*100+o*10+t,n+10,n-1]];}),
+  return[t?`${h*100} + ${t*10} + ${o} = ?`:`${h*100} + ${o} = ?`,n,[h*100+t+o,h*100+o*10+t,n+10,n-1]];}),
 T('2.NBT.4','Compare three-digit numbers',()=>{
   const s=new Set();while(s.size<4)s.add(R(100,999));const a=[...s],big=Math.random()<.5,t=big?Math.max(...a):Math.min(...a);
   return[big?'Which number is the greatest?':'Which number is the least?',t,a.filter(x=>x!==t)];}),
