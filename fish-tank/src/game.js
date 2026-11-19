@@ -229,10 +229,11 @@ function mergeCode(list){
 // ---------- tuning (checked with a simulation: all right and quick earns every star; 9 of 10 at a normal pace earns most) ----------
 // holes are heights as a fraction of the tank; water above a hole leaks out of it
 const MODES={
-  high:{holes:[.15,.37,.58,.80],T:40,P:.23,c:.0128},   // grade 9: 4 holes, 40 s (leak scaled so each question costs the same)
-  early:{holes:[.15,.475,.80],T:28,P:.21,c:.0158},   // K-2: 3 holes, a little more time (28 s)
-  elem:{holes:[.15,.475,.80],T:20,P:.21,c:.022},   // grades 3-5: 3 holes, 20 s per question
-  mid :{holes:[.15,.37,.58,.80],T:30,P:.23,c:.017} // grades 6-8: 4 holes, 30 s per question
+  // P = water per right answer, c = slow leak, D = water lost after a wrong answer or time-up, sf = how much speed changes the pour (tuned by simulation, tools/tune.js)
+  high:{holes:[.15,.37,.58,.80],T:40,P:.088,c:.0025,D:.035,sf:.14},   // grade 9: 4 holes, 40 s
+  early:{holes:[.15,.475,.80],T:28,P:.108,c:.0035,D:.059,sf:.24},   // K-2: 3 holes, a little more time (28 s)
+  elem:{holes:[.15,.475,.80],T:20,P:.092,c:.0038,D:.048,sf:.2},   // grades 3-5: 3 holes, 20 s per question
+  mid :{holes:[.15,.37,.58,.80],T:30,P:.118,c:.0061,D:.044,sf:.18} // grades 6-8: 4 holes, 30 s per question
 };
 const modeFor=g=>g<=2?MODES.early:g<=5?MODES.elem:g>=9?MODES.high:MODES.mid;
 const ROUND=10, YB=364, H=326, X0=50, X1=238, WALL=244, GROUND=394;
@@ -504,7 +505,7 @@ function drawTank(g,dt){
     if(lv<=h+.004||g.plugs.some(x=>x.i===i)){p.setAttribute('d','');return;}
     const y0=yOf(h),v=190*Math.sqrt(lv-h),tf=Math.sqrt(2*(GROUND-y0)/420);
     let d='';for(let k=0;k<=14;k++){const tt=tf*k/14;d+=(k?' L':'M')+(WALL+v*tt).toFixed(1)+' '+(y0+210*tt*tt).toFixed(1);}
-    p.setAttribute('d',d);p.setAttribute('stroke-dashoffset',(-t*70).toFixed(1));
+    p.setAttribute('d',d);p.setAttribute('stroke-dashoffset',(-t*70).toFixed(1));p.setAttribute('stroke-width',g.drain>.002?7:4);
   });
   // stars light up for each hole the water covers
   mode.holes.forEach((h,i)=>{const on=lv>=h+.03;starEls[i].style.fill=on?'#ffd23f':'#dcebf3';starEls[i].style.stroke=on?'#16405c':'#9db9c8';});
@@ -539,7 +540,7 @@ function newQuestion(){
 function startRound(){
   if(!store.current)return;
   const grade=store.grade,mode=modeFor(grade);
-  g={usedCards:new Set(),plugs:[],freeze:0,grade,mode,level:.30,pending:0,qi:0,points:0,streak:0,best:0,correct:0,missed:[],tLeft:mode.T,
+  g={usedCards:new Set(),plugs:[],freeze:0,grade,mode,level:.30,pending:0,drain:0,qi:0,points:0,streak:0,best:0,correct:0,missed:[],tLeft:mode.T,
      state:'idle',answered:0,fb:0,settle:0,used:new Set(),lastTopic:null,q:null,everFull:false,time:0,active:true,quitArm:0};
   // each round: 3 to 5 of the 10 questions are plain calculations, spread at random
   const k=3+Math.floor(Math.random()*3);g.plan=Array.from({length:ROUND},(_,i)=>i<k);
@@ -602,11 +603,12 @@ function answer(i){
   btns.forEach((b,k)=>{b.disabled=true;if(g.q.c[k]===g.q.a)b.classList.add('right');else if(k===i)b.classList.add('wrong');else b.classList.add('dimmed');});
   if(right){
     const f=g.tLeft/g.mode.T;
-    g.pending+=g.mode.P*(.6+.8*f);g.streak++;g.best=Math.max(g.best,g.streak);g.correct++;
-    const pts=1+(f>.5?1:0)+(g.streak>=3?1:0);   // 1 point, +1 if fast, +1 on a streak of 3 or moreg.points+=pts;
+    g.pending+=g.mode.P*(1-g.mode.sf/2+g.mode.sf*f);g.streak++;g.best=Math.max(g.best,g.streak);g.correct++;
+    const pts=1+(f>.5?1:0)+(g.streak>=3?1:0);
+    g.points+=pts;   // 1 point, +1 if fast, +1 on a streak of 3 or more
     $('toast').textContent=f>.6?`Fast! +${pts}`:`Correct! +${pts}`;g.fb=.9;sfx('right',g.streak-1);
   }else{
-    sfx('wrong');g.streak=0;g.missed.push({q:g.q.q,a:g.q.a,std:g.q.std});
+    sfx('wrong');g.drain+=g.mode.D;g.streak=0;g.missed.push({q:g.q.q,a:g.q.a,std:g.q.std});
     $('toast').innerHTML=(i<0?"Time's up. ":'Not quite. ')+'The answer is '+fmt(g.q.a);g.fb=2.0;
   }
   $('pts').textContent=g.points;$('streak').textContent='Streak '+g.streak;
@@ -650,6 +652,7 @@ function loop(ts){
   if(g.quitArm>0){g.quitArm-=dt;if(g.quitArm<=0){g.quitArm=0;$('quitBtn').textContent='End round';}}
   // water in
   const add=Math.min(g.pending,.3*dt);g.pending-=add;g.level=Math.min(1,g.level+add);
+  const lose=Math.min(g.drain,.3*dt);g.drain-=lose;g.level=Math.max(g.mode.holes[0],g.level-lose);   // a wrong answer makes the tank leak extra
   if(g.level>=1&&!g.everFull){g.everFull=true;g.points+=5;$('pts').textContent=g.points;$('toast').textContent+='  Tank full! +5';sfx('full');}
   // water out (only through covered holes)
   if(g.state!=='settle'){
@@ -664,7 +667,7 @@ function loop(ts){
   }else if(g.state==='feedback'){
     g.fb-=dt;if(g.fb<=0)advance();
   }else if(g.state==='settle'){
-    if(g.pending<.002){g.settle-=dt;if(g.settle<=0){finish();return;}}
+    if(g.pending<.002&&g.drain<.002){g.settle-=dt;if(g.settle<=0){finish();return;}}
   }
   drawTank(g,dt);
   requestAnimationFrame(loop);
