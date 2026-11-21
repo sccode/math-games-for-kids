@@ -1222,6 +1222,53 @@ T('S-ID.2','Median and interquartile range',()=>{
   const s=new Set();while(s.size<7)s.add(R(1,40));const a=[...s].sort((p,q)=>p-q),shown=shuf(a),q1=a[1],q3=a[5],med=a[3];
   if(Math.random()<.5)return[`What is the median of ${shown.join(', ')}?`,med,[a[2],a[4],Math.round((a[0]+a[6])/2)===med?a[2]:Math.round((a[0]+a[6])/2),shown[3]===med?a[4]:shown[3]]];
   const iqr=q3-q1;return[`Find the interquartile range (Q3 − Q1) of ${shown.join(', ')}.`,iqr,[a[6]-a[0],q3,q1,iqr+1]];}),
+// ---- grade 9 geometry (G-CO, G-SRT, G-GPE, G-GMD, G-C) ----
+T('G-CO.9','Parallel lines and a transversal',()=>{
+  let a;do{a=R(40,140);}while(a===90);
+  const t=pick([['corresponding',1],['alternate interior',1],['alternate exterior',1],['same-side interior',0]]),ans=t[1]?a:180-a;
+  return[`Parallel lines are cut by a transversal. One angle measures ${a}°. What is the measure of its ${t[0]} angle?`,`${ans}°`,[`${t[1]?180-a:a}°`,`${ans+10}°`,`${ans-10}°`,'90°']];}),
+T('G-CO.10','Angles in a triangle',()=>{
+  const t=R(0,2);
+  if(t===0){const a=R(30,80),b=R(30,90);return[`A triangle has angles of ${a}° and ${b}°. What is the third angle?`,`${180-a-b}°`,[`${a+b}°`,`${180-a}°`,`${360-a-b}°`,`${180-a-b+10}°`]];}
+  if(t===1){const a=R(30,80),b=R(30,90);return[`A triangle has interior angles of ${a}° and ${b}° at two of its vertices. What is the exterior angle at the third vertex?`,`${a+b}°`,[`${180-a-b}°`,`${180-a}°`,`${a+b+10}°`,`${360-a-b}°`]];}
+  const v=R(10,50)*2;return[`An isosceles triangle has a vertex angle of ${v}°. What is each base angle?`,`${(180-v)/2}°`,[`${180-v}°`,`${v}°`,`${(180-v)/2+10}°`,`${(360-v)/2}°`]];}),
+T('G-CO.10','Angles in a polygon',()=>{
+  const t=R(0,2),n=pick([5,6,8,9,10,12]);
+  if(t===0){const s=(n-2)*180;return[`What is the sum of the interior angles of a polygon with ${n} sides?`,`${s}°`,[`${(n-1)*180}°`,`${n*180}°`,`${s-180}°`,'360°']];}
+  if(t===1){const e=(n-2)*180/n;return[`What is each interior angle of a regular polygon with ${n} sides?`,`${e}°`,[`${360/n}°`,`${e+10}°`,`${e-10}°`,`${180-e/2}°`]];}
+  const e=360/n;return[`What is each exterior angle of a regular polygon with ${n} sides?`,`${e}°`,[`${(n-2)*180/n}°`,`${e+10}°`,`${e*2}°`,`${180/n}°`]];}),
+T('G-SRT.5','Similar figures',()=>{
+  const t=R(0,2),k=R(2,4);
+  if(t===2){const A=R(2,9);return[`Two similar figures have a scale factor of ${k} : 1. The smaller one has an area of ${A} cm². What is the area of the larger one?`,`${A*k*k} cm²`,[`${A*k} cm²`,`${A*k*2} cm²`,`${A*k*k*k} cm²`,`${A*(k+1)} cm²`]];}
+  const a=R(3,9),b=R(a+1,14);
+  if(t===0)return[`Triangle ABC is similar to triangle DEF. AB = ${a}, DE = ${a*k}, and BC = ${b}. What is EF?`,b*k,[b+k,b*k+a,b*k-1,a*k]];
+  return[`Triangle ABC is similar to triangle DEF. AB = ${a*k}, DE = ${a}, and BC = ${b*k}. What is EF?`,b,[b+k,b*k,b+1,a]];}),
+T('G-SRT.8','Pythagorean theorem',()=>{
+  const [a,b,c]=pick([[3,4,5],[5,12,13],[8,15,17],[7,24,25]]),m=pick([1,1,2,3]),A=a*m,B=b*m,C=c*m,t=R(0,2);
+  if(t===0)return[`A right triangle has legs ${A} and ${B}. What is the hypotenuse?`,C,[A+B,C+1,C-1,B-A+C]];
+  if(t===1)return[`A right triangle has a hypotenuse of ${C} and one leg of ${A}. What is the other leg?`,B,[C-A,B+1,B-1,C+A]];
+  return[`A ${C} ft ladder leans against a wall with its base ${A} ft from the wall. How high up the wall does it reach, in feet?`,B,[C-A,B+1,B-1,A+B]];}),
+T('G-SRT.6','Right triangle trig',()=>{
+  const [a,b,c]=pick([[3,4,5],[5,12,13],[8,15,17],[7,24,25]]),f=pick(['sin','cos','tan']);
+  const ans=f==='sin'?F(a,c):f==='cos'?F(b,c):F(a,b);
+  const wr=f==='sin'?[F(b,c),F(a,b),F(c,a)]:f==='cos'?[F(a,c),F(a,b),F(c,b)]:[F(b,a),F(a,c),F(b,c)];
+  return[`In a right triangle, the side opposite angle A is ${a}, the side adjacent to A is ${b}, and the hypotenuse is ${c}. What is ${f} A?`,ans,wr];}),
+T('G-GPE.7','Distance and midpoint',()=>{
+  if(Math.random()<.5){
+    const x1=R(-6,6),y1=R(-6,6),x2=R(-6,6),y2=R(-6,6),mx=x1+x2,my=y1+y2;
+    if(mx%2||my%2||(x1===x2&&y1===y2)){return[`What is the midpoint of (${S(x1)}, ${S(y1)}) and (${S(x1+4)}, ${S(y1+2)})?`,`(${S(x1+2)}, ${S(y1+1)})`,[`(${S(x1+4)}, ${S(y1+2)})`,`(${S(x1+1)}, ${S(y1+2)})`,`(${S(x1+2)}, ${S(y1+2)})`,`(${S(x1+4)}, ${S(y1+1)})`]];}
+    return[`What is the midpoint of (${S(x1)}, ${S(y1)}) and (${S(x2)}, ${S(y2)})?`,`(${S(mx/2)}, ${S(my/2)})`,[`(${S(mx)}, ${S(my)})`,`(${S(x2-x1)}, ${S(y2-y1)})`,`(${S(mx/2+1)}, ${S(my/2)})`,`(${S(mx/2)}, ${S(my/2+1)})`]];}
+  const [dx,dy,d]=pick([[3,4,5],[4,3,5],[6,8,10],[8,6,10],[5,12,13],[12,5,13]]),x1=R(-5,4),y1=R(-5,4),sx=pick([-1,1]),sy=pick([-1,1]);
+  return[`What is the distance between (${S(x1)}, ${S(y1)}) and (${S(x1+sx*dx)}, ${S(y1+sy*dy)})?`,d,[dx+dy,d+1,d-1,Math.abs(dx-dy)]];}),
+T('G-GMD.3','Volume of a cylinder and cone',()=>{
+  if(Math.random()<.5){const r=R(2,6),h=R(2,9);return[`What is the volume of a cylinder with radius ${r} cm and height ${h} cm? (in terms of π)`,`${r*r*h}π cm³`,[`${2*r*h}π cm³`,`${r*h}π cm³`,`${r*r*h*3}π cm³`,`${r*r*h+r}π cm³`]];}
+  const r=R(2,6),h=pick([3,6,9]);return[`What is the volume of a cone with radius ${r} cm and height ${h} cm? (in terms of π)`,`${r*r*h/3}π cm³`,[`${r*r*h}π cm³`,`${r*h/3}π cm³`,`${r*r*h/3+r}π cm³`,`${r*r*h*3}π cm³`]];}),
+T('G-C','Circle angles and arcs',()=>{
+  const t=R(0,3);
+  if(t===0){const arc=R(15,80)*2;return[`An inscribed angle intercepts an arc of ${arc}°. What is the measure of the inscribed angle?`,`${arc/2}°`,[`${arc}°`,`${arc*2}°`,`${180-arc/2}°`,`${arc/2+10}°`]];}
+  if(t===1){const ang=R(15,70);return[`An inscribed angle measures ${ang}°. What is the measure of the arc it intercepts?`,`${ang*2}°`,[`${ang}°`,`${ang/2+ang}°`,`${180-ang}°`,`${ang*2+10}°`]];}
+  if(t===2){return['An angle is inscribed in a semicircle. What is its measure?','90°',['45°','180°','60°','120°']];}
+  const r=pick([6,12]),th=pick([60,90,120,180]);return[`A circle has radius ${r} cm. What is the length of an arc with a central angle of ${th}°? (in terms of π)`,`${r*th/180}π cm`,[`${r*r*th/360}π cm`,`${r*th/90}π cm`,`${2*r}π cm`,`${r*th/180+2}π cm`]];}),
 );
 
 // plain calculation for grade 9: quick mental arithmetic that comes up in algebra

@@ -53,6 +53,45 @@ for(const t of G[9]){for(let i=0;i<3000;i++){const r=t.gen();n++;
   case 'Median and interquartile range':{
     if(m=r.q.match(/median of (.*)\?$/)){const a=m[1].split(', ').map(Number).sort((p,q)=>p-q);exactlyOne(c=>num(c)===a[3],'MED');}
     else{m=r.q.match(/of (.*)\.$/);const a=m[1].split(', ').map(Number).sort((p,q)=>p-q);exactlyOne(c=>num(c)===a[5]-a[1],'IQR');}break;}
+  case 'Parallel lines and a transversal':{m=r.q.match(/measures (\d+)°\. .* its (.*) angle\?/);const a=+m[1],same_=/^(corresponding|alternate)/.test(m[2]),exp=same_?a:180-a;exactlyOne(c=>parseInt(c)===exp&&/°$/.test(c),'PARA');break;}
+  case 'Angles in a triangle':{
+    if(m=r.q.match(/angles of (\d+)° and (\d+)°\. What is the third/)){exactlyOne(c=>parseInt(c)===180-m[1]-m[2],'TRI3');}
+    else if(m=r.q.match(/interior angles of (\d+)° and (\d+)° at two/)){exactlyOne(c=>parseInt(c)===+m[1]+ +m[2],'EXT');}
+    else if(m=r.q.match(/vertex angle of (\d+)°/)){exactlyOne(c=>parseInt(c)*2+ +m[1]===180,'ISO');}
+    else log('TRI? '+r.q);break;}
+  case 'Angles in a polygon':{
+    if(m=r.q.match(/sum of the interior angles of a polygon with (\d+) sides/)){exactlyOne(c=>parseInt(c)===(m[1]-2)*180,'PSUM');}
+    else if(m=r.q.match(/each interior angle of a regular polygon with (\d+) sides/)){exactlyOne(c=>Math.abs(parseInt(c)*m[1]-(m[1]-2)*180)<1e-9,'PINT');}
+    else if(m=r.q.match(/each exterior angle of a regular polygon with (\d+) sides/)){exactlyOne(c=>parseInt(c)*m[1]===360,'PEXT');}
+    else log('POLY? '+r.q);break;}
+  case 'Similar figures':{
+    if(m=r.q.match(/AB = (\d+), DE = (\d+), and BC = (\d+)\. What is EF/)){exactlyOne(c=>+c*m[1]===m[3]*m[2]&&Number.isInteger(+c),'SIM');}
+    else if(m=r.q.match(/scale factor of (\d+) : 1\. .* area of (\d+) cm²/)){exactlyOne(c=>parseInt(c)===m[2]*m[1]*m[1]&&/ cm²$/.test(c),'SIMA');}
+    else log('SIM? '+r.q);break;}
+  case 'Pythagorean theorem':{
+    if(m=r.q.match(/legs (\d+) and (\d+)\. What is the hypotenuse/)){exactlyOne(c=>+c*c===m[1]*m[1]+m[2]*m[2],'HYP');}
+    else if(m=r.q.match(/hypotenuse of (\d+) and one leg of (\d+)/)){exactlyOne(c=>+c*c+m[2]*m[2]==m[1]*m[1],'LEG');}
+    else if(m=r.q.match(/A (\d+) ft ladder .* base (\d+) ft from/)){exactlyOne(c=>+c*c+m[2]*m[2]==m[1]*m[1],'LADDER');}
+    else log('PY? '+r.q);break;}
+  case 'Right triangle trig':{m=r.q.match(/opposite angle A is (\d+), the side adjacent to A is (\d+), and the hypotenuse is (\d+)\. What is (sin|cos|tan) A/);
+    if(m[1]*m[1]+m[2]*m[2]!==m[3]*m[3])log('TRIPLE '+r.q);
+    const want=m[4]==='sin'?m[1]/m[3]:m[4]==='cos'?m[2]/m[3]:m[1]/m[2];
+    exactlyOne(c=>{const k=c.match(/^\[\[(\d+)\|(\d+)\]\]$/);return k&&Math.abs(k[1]/k[2]-want)<1e-9;},'TRIG');break;}
+  case 'Distance and midpoint':{
+    if(m=r.q.match(/midpoint of \((−?\d+), (−?\d+)\) and \((−?\d+), (−?\d+)\)/)){const X=(num(m[1])+num(m[3]))/2,Y=(num(m[2])+num(m[4]))/2;
+      exactlyOne(c=>{const k=c.match(/^\((−?\d+), (−?\d+)\)$/);return k&&num(k[1])===X&&num(k[2])===Y;},'MID');}
+    else if(m=r.q.match(/distance between \((−?\d+), (−?\d+)\) and \((−?\d+), (−?\d+)\)/)){const d=Math.hypot(num(m[1])-num(m[3]),num(m[2])-num(m[4]));exactlyOne(c=>Math.abs(+c-d)<1e-9,'DIST');}
+    else log('GPE? '+r.q);break;}
+  case 'Volume of a cylinder and cone':{
+    if(m=r.q.match(/cylinder with radius (\d+) cm and height (\d+) cm/)){exactlyOne(c=>c===`${m[1]*m[1]*m[2]}π cm³`,'CYL');}
+    else if(m=r.q.match(/cone with radius (\d+) cm and height (\d+) cm/)){exactlyOne(c=>c===`${m[1]*m[1]*m[2]/3}π cm³`&&Number.isInteger(m[1]*m[1]*m[2]/3),'CONE');}
+    else log('VOL? '+r.q);break;}
+  case 'Circle angles and arcs':{
+    if(m=r.q.match(/intercepts an arc of (\d+)°/)){exactlyOne(c=>parseInt(c)*2===+m[1],'INS1');}
+    else if(m=r.q.match(/inscribed angle measures (\d+)°\. .* arc/)){exactlyOne(c=>parseInt(c)===2*m[1],'INS2');}
+    else if(/semicircle/.test(r.q)){exactlyOne(c=>c==='90°','SEMI');}
+    else if(m=r.q.match(/radius (\d+) cm\. .* central angle of (\d+)°/)){const L=2*m[1]*m[2]/360;exactlyOne(c=>Number.isInteger(L)&&c===`${L}π cm`,'ARC');}
+    else log('CIR? '+r.q);break;}
   case 'Rearrange a formula':{break;}
   case 'Quick calculation':{const q=r.q.replace(' = ?','');let v;
     if(m=q.match(/^(\d+)% of (\d+)$/))v=m[1]*m[2]/100;else if(m=q.match(/^√(\d+)$/))v=Math.sqrt(+m[1]);else v=ev(q.replace(/(−?\d+) × \((−\d+)\)/,'$1*($2)'),0);
